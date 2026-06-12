@@ -1,0 +1,785 @@
+{
+  "name": "Uni Project",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        928
+      ],
+      "id": "e2fd96cb-e540-45f0-9b5b-48514f756169",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        224
+      ],
+      "id": "b8725cfd-f1a9-4b9e-8bb9-312566ed4db8",
+      "name": "OpenAI Chat Model",
+      "retryOnFail": false,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "openAiApi": {
+          "id": "0UQR2cFDcwgRbWYw",
+          "name": "OpenAi account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "review",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/The-Emporium",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Uni-Project",
+          "mode": "list",
+          "cachedResultName": "Uni-Project",
+          "cachedResultUrl": "https://github.com/The-Emporium/Uni-Project"
+        },
+        "pullRequestNumber": "={{ $('GitHub Pull Trigger').item.json.body.number }}",
+        "event": "comment",
+        "body": "={{ $json.output.body }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        112
+      ],
+      "id": "3c33dbaf-8607-4f4c-8cfb-7e51a9e721c6",
+      "name": "Create a review",
+      "webhookId": "f5458605-dbe5-4630-855e-c45178777272",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "9Kk4TkRgUnp5MjBu",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const instructions = `\nUse meaningful and descriptive names that clearly explain the purpose.\nKeep every function small, focused, and limited to a single responsibility.\nFollow a consistent formatting style to improve code readability everywhere.\nWrite clear code so that comments are rarely ever truly necessary.\nAvoid repeating logic; extract common functionality into reusable components.\nSeparate concerns by organizing code based on responsibility and functionality.\nWrite automated tests to ensure code works correctly and remains stable.\nHandle errors gracefully with informative messages and proper fallback logic.\nStructure your application into independent, modular, and well-defined components.\nRegularly refactor and improve code to keep it clean and maintainable.\n`\n\nfor (const item of $input.all()) {\n  const file = item.json;\n\n  const reviewPrompt = `\nYou are a senior software engineer reviewing java code for vulnerabilities. \n\n${instructions}\n\nBelow is a GitHub diff for the file: ${file.filename}\n\nPatch:\n\\`\\`\\`diff\n${file.patch}\n\\`\\`\\`\n\nPlease provide a brief code review comment suggesting improvements, pointing out issues, or appreciating good changes.\n\nFORMAT: JSON\n{\n  \"body\": \"\",\n  \"position\": \"<REPLACE WITH ACTUAL LINE NUMBER>\",\n  \"path\": ${file.filename}\n}\n`;\n\n  item.json.reviewPrompt = reviewPrompt;\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        112
+      ],
+      "id": "36c249bc-5ace-4948-8a5a-fac4a8e39be8",
+      "name": "Pull Request AI Prompt"
+    },
+    {
+      "parameters": {
+        "jsCode": "const instructions = `\nUse meaningful and descriptive names that clearly explain the purpose.\nKeep every function small, focused, and limited to a single responsibility.\nFollow a consistent formatting style to improve code readability everywhere.\nWrite clear code so that comments are rarely ever truly necessary.\nAvoid repeating logic; extract common functionality into reusable components.\nSeparate concerns by organizing code based on responsibility and functionality.\nWrite automated tests to ensure code works correctly and remains stable.\nHandle errors gracefully with informative messages and proper fallback logic.\nStructure your application into independent, modular, and well-defined components.\nRegularly refactor and improve code to keep it clean and maintainable.\n`\n\nfor (const item of $input.all()) {\n  const file = item.json;\n\n  const reviewPrompt = `\nYou are a senior software engineer reviewing java code for vulnerabilities. \n\n${instructions}\n\nBelow is a Java code file nammed: ${file.name}\nINGONORE LINE 1 TO 17 OF THE CODE\n\nJava Code:\n${file.download_url}\n\n\nPlease provide the CEW number is their is a vulnerability, along with what the vulnerability is. if their is no vulnerability found state \"NO VULNERABIlITY FOUND\"\n\n`;\n\n  item.json.reviewPrompt = reviewPrompt;\n}\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        1072
+      ],
+      "id": "9de0b4bf-46b0-4b31-b5be-6f27d56766df",
+      "name": "Benchmark AI Prompt"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        624,
+        928
+      ],
+      "id": "b3477822-9c83-471f-bf59-082c011e4600",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/The-Emporium",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Uni-Project",
+          "mode": "list",
+          "cachedResultName": "Uni-Project",
+          "cachedResultUrl": "https://github.com/The-Emporium/Uni-Project"
+        },
+        "events": [
+          "pull_request"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        112
+      ],
+      "id": "66da988a-55b7-4cae-87c2-3200f3b83fc9",
+      "name": "GitHub Pull Trigger",
+      "webhookId": "a06137a3-c62c-455d-8c36-7b469f91177b",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "9Kk4TkRgUnp5MjBu",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.pull_request.url }}/files",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -448,
+        112
+      ],
+      "id": "a73c50f6-86fb-41da-bca6-88ebe22490ab",
+      "name": "GitHub Pull Changes",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "KfoxrmTuq5W09AjI",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst updatedItems = items.map((item) => {\n  item.json.name = item.json.name.replace(\".java\", \"\");\n  return item;\n});\n\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        768
+      ],
+      "id": "52750c64-03f6-4145-9782-f07f0b6f9a73",
+      "name": "Removes File Extension"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "Benchmark Results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        928
+      ],
+      "id": "fb7a12bb-47d1-4b25-b03c-f953fc47ade9",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/The-Emporium",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Uni-Project",
+          "mode": "list",
+          "cachedResultName": "Uni-Project",
+          "cachedResultUrl": "https://github.com/The-Emporium/Uni-Project"
+        },
+        "filePath": "={{ $json.path }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        928
+      ],
+      "id": "52cbcb7e-5bcf-4744-a0f4-dc9103889fdc",
+      "name": "List Java Files",
+      "webhookId": "53100010-1389-425b-9445-66509b2ceff0",
+      "retryOnFail": false,
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "9Kk4TkRgUnp5MjBu",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/The-Emporium/Uni-Project",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Uni-Project",
+          "mode": "list",
+          "cachedResultName": "Uni-Project",
+          "cachedResultUrl": "https://github.com/The-Emporium/Uni-Project"
+        },
+        "filePath": "OWASP-Benchmark Java/testcode"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -528,
+        928
+      ],
+      "id": "a8256c46-1bf0-4d55-b78c-5e331bf9afb9",
+      "name": "GitHub Directories ",
+      "webhookId": "a85dc9db-52d8-4284-b8ff-d8ef489281f4",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "9Kk4TkRgUnp5MjBu",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"AI-Body\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n        \"AI-CWE\": {\n            \"type\": \"string\",\n            \"description\": \"<REQUIRED FIELD> CWE Number\"\n        },\n\t\t\"AI-Position\": {\n\t\t\t\"type\": \"string\",\n            \"description\": \"<REQUIRED FIELD> Line 10 - 20\"\n        },\n        \"AI-Path\": {\n            \"type\": \"string\",\n            \"description\": \"<REQUIRED FIELD> File Name\"\n        }\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        1296
+      ],
+      "id": "0fde688d-5b6a-4b2e-8e1d-a53e1645dc0b",
+      "name": "format_final_json_response"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"body\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"position\": {\n\t\t\t\"type\": \"string\"\n        },\n        \"path\": {\n            \"type\": \"string\"\n        }\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        224
+      ],
+      "id": "7977753d-a759-4493-9412-b5dea77ef9b7",
+      "name": "format_final_json_response1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1467646114776875071",
+          "mode": "id"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1467646115620065505",
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://discord.com/channels/1467646114776875071/1467646115620065505"
+        },
+        "options": {},
+        "files": {
+          "values": [
+            {
+              "inputFieldName": "Benchmark Results"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        928
+      ],
+      "id": "6557ecff-1081-41a4-8227-85f068ec2d3b",
+      "name": "Send CSV",
+      "webhookId": "f8f766d7-0e01-4436-9a8b-ac15cb2776c6",
+      "credentials": {
+        "discordOAuth2Api": {
+          "id": "vSNGxa09VU5XfwR7",
+          "name": "Discord account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.reviewPrompt }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "00c4ba26-a498-499d-8963-2b4408008f79",
+      "name": "Pull Request AI",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.reviewPrompt }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        272,
+        1072
+      ],
+      "id": "4b0ad531-c3a9-486a-b7ee-09e2cab68aff",
+      "name": "Benchmark AI",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "CxrsVIHzCHIXbbd2",
+          "mode": "list",
+          "cachedResultName": "abc",
+          "cachedResultUrl": "/projects/E6N1RdG0RgC20HVC/datatables/CxrsVIHzCHIXbbd2"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Test_Name",
+              "keyValue": "={{ $json.name }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        768
+      ],
+      "id": "f03559a0-cccc-48fc-8bbe-08a61369654c",
+      "name": "Benchmark CSV",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1467646114776875071",
+          "mode": "id"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1467646115620065505",
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://discord.com/channels/1467646114776875071/1467646115620065505"
+        },
+        "content": "AI Error",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        192,
+        432
+      ],
+      "id": "34c9fb30-c266-46dd-af33-7d81a997c7b8",
+      "name": "Send Error Message",
+      "webhookId": "f5df9f74-0022-47cb-a94e-88c3f0104770",
+      "credentials": {
+        "discordOAuth2Api": {
+          "id": "vSNGxa09VU5XfwR7",
+          "name": "Discord account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1467646114776875071",
+          "mode": "id"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1467646115620065505",
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://discord.com/channels/1467646114776875071/1467646115620065505"
+        },
+        "content": "=AI Review Completed\n({{ $('GitHub Pull Trigger').item.json.body.pull_request.url }}) ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        912,
+        112
+      ],
+      "id": "77b60327-dced-4dfb-96a2-7952f75d6bb2",
+      "name": "Send a message",
+      "webhookId": "29e3e92e-f725-4b65-8f66-048bcb7b3cb1",
+      "executeOnce": true,
+      "credentials": {
+        "discordOAuth2Api": {
+          "id": "vSNGxa09VU5XfwR7",
+          "name": "Discord account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "GitHub Directories ": [
+      {
+        "json": {
+          "name": "1999-2740",
+          "path": "OWASP-Benchmark Java/testcode/1999-2740",
+          "sha": "c55fcb75fdaff77e081ea85da5923bc5c6501b57",
+          "size": 0,
+          "url": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740?ref=Vulnerabilities",
+          "html_url": "https://github.com/The-Emporium/Uni-Project/tree/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740",
+          "git_url": "https://api.github.com/repos/The-Emporium/Uni-Project/git/trees/c55fcb75fdaff77e081ea85da5923bc5c6501b57",
+          "download_url": null,
+          "type": "dir",
+          "_links": {
+            "self": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740?ref=Vulnerabilities",
+            "git": "https://api.github.com/repos/The-Emporium/Uni-Project/git/trees/c55fcb75fdaff77e081ea85da5923bc5c6501b57",
+            "html": "https://github.com/The-Emporium/Uni-Project/tree/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740"
+          }
+        }
+      }
+    ],
+    "List Java Files": [
+      {
+        "json": {
+          "name": "BenchmarkTest01999.java",
+          "path": "OWASP-Benchmark Java/testcode/1999-2740/BenchmarkTest01999.java",
+          "sha": "39b19b3a3925785cc9976c98630884bbaaffad67",
+          "size": 5289,
+          "url": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest01999.java?ref=Vulnerabilities",
+          "html_url": "https://github.com/The-Emporium/Uni-Project/blob/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest01999.java",
+          "git_url": "https://api.github.com/repos/The-Emporium/Uni-Project/git/blobs/39b19b3a3925785cc9976c98630884bbaaffad67",
+          "download_url": "https://raw.githubusercontent.com/The-Emporium/Uni-Project/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest01999.java",
+          "type": "file",
+          "_links": {
+            "self": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest01999.java?ref=Vulnerabilities",
+            "git": "https://api.github.com/repos/The-Emporium/Uni-Project/git/blobs/39b19b3a3925785cc9976c98630884bbaaffad67",
+            "html": "https://github.com/The-Emporium/Uni-Project/blob/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest01999.java"
+          }
+        }
+      },
+      {
+        "json": {
+          "name": "BenchmarkTest02000.java",
+          "path": "OWASP-Benchmark Java/testcode/1999-2740/BenchmarkTest02000.java",
+          "sha": "0973ea2b893764684f05c62c4383199460586941",
+          "size": 4939,
+          "url": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02000.java?ref=Vulnerabilities",
+          "html_url": "https://github.com/The-Emporium/Uni-Project/blob/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02000.java",
+          "git_url": "https://api.github.com/repos/The-Emporium/Uni-Project/git/blobs/0973ea2b893764684f05c62c4383199460586941",
+          "download_url": "https://raw.githubusercontent.com/The-Emporium/Uni-Project/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02000.java",
+          "type": "file",
+          "_links": {
+            "self": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02000.java?ref=Vulnerabilities",
+            "git": "https://api.github.com/repos/The-Emporium/Uni-Project/git/blobs/0973ea2b893764684f05c62c4383199460586941",
+            "html": "https://github.com/The-Emporium/Uni-Project/blob/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02000.java"
+          }
+        }
+      },
+      {
+        "json": {
+          "name": "BenchmarkTest02001.java",
+          "path": "OWASP-Benchmark Java/testcode/1999-2740/BenchmarkTest02001.java",
+          "sha": "770047cfc0ce5a661472387fc43e945ec6db264d",
+          "size": 4919,
+          "url": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02001.java?ref=Vulnerabilities",
+          "html_url": "https://github.com/The-Emporium/Uni-Project/blob/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02001.java",
+          "git_url": "https://api.github.com/repos/The-Emporium/Uni-Project/git/blobs/770047cfc0ce5a661472387fc43e945ec6db264d",
+          "download_url": "https://raw.githubusercontent.com/The-Emporium/Uni-Project/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02001.java",
+          "type": "file",
+          "_links": {
+            "self": "https://api.github.com/repos/The-Emporium/Uni-Project/contents/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02001.java?ref=Vulnerabilities",
+            "git": "https://api.github.com/repos/The-Emporium/Uni-Project/git/blobs/770047cfc0ce5a661472387fc43e945ec6db264d",
+            "html": "https://github.com/The-Emporium/Uni-Project/blob/Vulnerabilities/OWASP-Benchmark%20Java/testcode/1999-2740/BenchmarkTest02001.java"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "GitHub Directories ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Benchmark AI",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Pull Request AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        [
+          {
+            "node": "Send Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Request AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Pull Request AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Benchmark AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Benchmark AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub Pull Trigger": {
+      "main": [
+        [
+          {
+            "node": "GitHub Pull Changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub Pull Changes": {
+      "main": [
+        [
+          {
+            "node": "Pull Request AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Removes File Extension": {
+      "main": [
+        [
+          {
+            "node": "Benchmark CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Java Files": {
+      "main": [
+        [
+          {
+            "node": "Removes File Extension",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Benchmark AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "GitHub Directories ": {
+      "main": [
+        [
+          {
+            "node": "List Java Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Send CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_final_json_response": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Benchmark AI",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_final_json_response1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Pull Request AI",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Request AI": {
+      "main": [
+        [
+          {
+            "node": "Create a review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Benchmark AI": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Benchmark CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a review": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "58fd7aed-5435-4e92-9ccd-38e7711664a4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d5179a7bf6512ce79f63b7aa15fa0b05afe779ee0136766735388f9a06f574ad"
+  },
+  "id": "fEPWmNpHpshVHnlaKOFiC",
+  "tags": []
+}
