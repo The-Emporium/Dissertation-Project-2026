@@ -1,0 +1,188 @@
+{
+  "name": "Data Table Importer",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "615ea5ce-8eac-4570-8176-c7b7c731cc7a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/The-Emporium",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Uni-Project",
+          "mode": "list",
+          "cachedResultName": "Uni-Project",
+          "cachedResultUrl": "https://github.com/The-Emporium/Uni-Project"
+        },
+        "filePath": "expectedresults-1.2.csv",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7b6f473c-dcf7-4c2b-b199-df31119b8a82",
+      "name": "Get a file",
+      "webhookId": "56a2a413-3b7a-4a28-b646-62d8d3f44090",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "9Kk4TkRgUnp5MjBu",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a2f498da-1d01-4096-b166-ab965e3a4576",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "CxrsVIHzCHIXbbd2",
+          "mode": "list",
+          "cachedResultName": "abc",
+          "cachedResultUrl": "/projects/E6N1RdG0RgC20HVC/datatables/CxrsVIHzCHIXbbd2"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Test_Name": "={{ $json['# test name'] }}",
+            "Category": "={{ $json[' category'] }}",
+            "Real_Vulnerability": "={{ $json[' real vulnerability'] }}",
+            "CWE": "={{ $json[' cwe'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Test_Name",
+              "displayName": "Test_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Real_Vulnerability",
+              "displayName": "Real_Vulnerability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "CWE",
+              "displayName": "CWE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "ef916d64-04b8-43bd-9ce3-2df42a0480bb",
+      "name": "Insert row"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b32bc92b-6be4-4b5d-b66d-231e03b38cf4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d5179a7bf6512ce79f63b7aa15fa0b05afe779ee0136766735388f9a06f574ad"
+  },
+  "id": "MxGbziMsXA1qmFLrUKh9H",
+  "tags": []
+}
